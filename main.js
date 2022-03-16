@@ -7,14 +7,13 @@
     import * as dat from 'dat.gui'
 
     // GUI console for to change values
-
     const gui = new dat.GUI()
     const world = {
         plane:{
-            width: 19,
-            height: 19,
-            widthSegments: 62,
-            heightSegments: 18
+            width: 24,
+            height: 24,
+            widthSegments: 25,
+            heightSegments: 25
         }
     }
     gui.add(world.plane, "width", 1, 20).onChange(generatePlane)
@@ -36,7 +35,6 @@
         const x = array[i]
         const y = array[i+1]
         const z = array[i+2]
-        array[i+2] = z + Math.random()
         }
         // Set colors attribute for the mousemove
         const colors = []
@@ -62,7 +60,6 @@
     const renderer = new THREE.WebGLRenderer()
 
     // Set renderer and append it
-
     renderer.setSize(innerWidth, innerHeight)
     renderer.setPixelRatio(devicePixelRatio)
     document.body.appendChild(renderer.domElement);
@@ -83,21 +80,30 @@
     const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
     scene.add(planeMesh)
     
-    
 
     // Create depth to the geometry with a loop and target de z axis
-
     const {array} = planeMesh.geometry.attributes.position;
-
-    for (let i=0; i<array.length; i+=3){
-        const x = array[i]
+    const randomValues = []
+    for (let i=0; i<array.length; i++){
+        if(i%3 === 0){
+            const x = array[i]
         const y = array[i+1]
         const z = array[i+2]
         array[i+2] = z + Math.random()
+        array[i] = x + (Math.random() -0.5)
+        array[i+1] = y + (Math.random() -0.5)
+        array[i+2] = z + Math.random()
+        }
+        randomValues.push(Math.random() -0.5)
     }
+    
+    // Duplicate the array of position
+    planeMesh.geometry.attributes.position.randomValues = 
+    randomValues
+    planeMesh.geometry.attributes.position.originalPosition = 
+    planeMesh.geometry.attributes.position.array
 
     // Set colors attribute for the mousemove
-
     const colors = []
     for (let i = 0; i < planeMesh.geometry.attributes.position.count; i++) {
         colors.push(0,.19,0.4) 
@@ -119,12 +125,10 @@
     scene.add(backLight)
 
     // Camera position
-
     new OrbitControls(camera, renderer.domElement)
-    camera.position.z = 7
+    camera.position.z = 10
 
     // Event listener for the mouse
-
     const mouse = {
         x:undefined,
         y:undefined
@@ -134,11 +138,29 @@
         mouse.y = -(event.clientY /innerHeight)*2+1
     })
 
+    let frame = 0
     // Rotate animation and Raycaster(pointer which detect the object)
     function animate() {
         requestAnimationFrame(animate)
         renderer.render(scene, camera)
         raycaster.setFromCamera(mouse, camera)
+        //Animate the postion (vectors)
+        frame +=0.01
+        const {array,
+             originalPosition, 
+             randomValues} = planeMesh.geometry.attributes.position
+        for (let i = 0; i < array.length; i+=3) {
+            // x
+            array[i] = originalPosition[i] + 
+            Math.cos(frame+randomValues[i])*0.003
+            //y
+            array[i+1] = originalPosition[i+1] + 
+            Math.sin(frame+randomValues[i])*0.003
+            
+        }
+        planeMesh.geometry.attributes.position.needsUpdate = true
+
+        //Animate the colors with an hover effect
         const intersects = raycaster.intersectObject(planeMesh)
         if(intersects.length>0){
             const {color} = intersects[0].object.geometry.attributes
@@ -189,16 +211,14 @@
                 }
             })
         }
-
-
         //boxMesh.rotation.x +=0.01
         //boxMesh.rotation.y +=0.01
-        
     }
     
     animate()
-    planeMesh.rotation.x = 2.4;
-    planeMesh.rotation.y = -.25;
+    // Roration of the planeMesh
+    //planeMesh.rotation.x = 2.4;
+    //planeMesh.rotation.y = -.25;
 
     
 
