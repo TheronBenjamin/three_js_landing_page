@@ -18,12 +18,26 @@
     document.body.appendChild(renderer.domElement);
 
     // Create a plane geometry
-    const planeGeometry = new THREE.PlaneGeometry(2,4,2,10)
-    const planeMaterial = new THREE.MeshPhongMaterial({color:0x0000FF, side : THREE.DoubleSide})
+    const planeGeometry = new THREE.PlaneGeometry(10,10,10,10)
+    const planeMaterial = new THREE.MeshPhongMaterial({
+        color:0x0000FF, 
+        side : THREE.DoubleSide,
+        // Add this to see the depth
+        flatShading : THREE.FlatShading
+    })
     const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
     scene.add(planeMesh)
-    console.log(planeMesh)
+    console.log(planeMesh.geometry.attributes.position.array)
+    const {array} = planeMesh.geometry.attributes.position;
 
+    // Create depth to the geometry with a loop and target de z axis
+
+    for (let i=0; i<array.length; i+=3){
+        const x = array[i]
+        const y = array[i+1]
+        const z = array[i+2]
+        array[i+2] = z + Math.random()
+    }
     // Lights
 
     const light = new THREE.DirectionalLight(0xFFFFFF, 1)
@@ -32,7 +46,7 @@
 
     // Camera setup
 
-    camera.position.z = 5
+    camera.position.z = 10
     
     // Rotate animation
 
