@@ -2,6 +2,7 @@
 // Find the latest version by visiting https://cdn.skypack.dev/three.
   
     import * as THREE from 'https://cdn.skypack.dev/three@0.126.1';
+    import {OrbitControls} from 'https://cdn.skypack.dev/three@0.126.1/examples/jsm/controls/OrbitControls.js'
     import * as dat from 'dat.gui'
 
     // GUI console for to change values
@@ -81,12 +82,19 @@
     }
     // Lights
 
-    const light = new THREE.DirectionalLight(0xFFFFFF, 1)
-    light.position.set(0, 0, 2)
-    scene.add(light)
+    // Front light
+    const fontLight = new THREE.DirectionalLight(0xFFFFFF, 1)
+    fontLight.position.set(0, 0, 1)
+    scene.add(fontLight)
 
-    // Camera setup
+    // Back light
+    const backLight = new THREE.DirectionalLight(0xFFFFFF, 1)
+    backLight.position.set(0, 0, -1)
+    scene.add(backLight)
 
+    // Camera position
+
+    new OrbitControls(camera, renderer.domElement)
     camera.position.z = 10
     
     // Rotate animation
