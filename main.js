@@ -4,7 +4,7 @@
     import * as THREE from 'https://cdn.skypack.dev/three@0.126.1';
     import * as dat from 'dat.gui'
 
-    // GUI console
+    // GUI console for to change values
 
     const gui = new dat.GUI()
     const world = {
