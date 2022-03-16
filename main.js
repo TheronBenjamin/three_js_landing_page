@@ -40,20 +40,18 @@
     }
 
 
-    // Set scene camera and renderer properties
-
+    // Set scene, camera, raycaster and renderer properties
+    const raycaster = new THREE.Raycaster()
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
         75, 
-        innerWidth/innerWidth, 
+        innerWidth/innerHeight, 
         0.1, 
         1000
         )
     const renderer = new THREE.WebGLRenderer()
 
-    //console.log(scene)
-    //console.log(camera)
-    //console.log(renderer)
+    // Set renderer and append it
 
     renderer.setSize(innerWidth, innerHeight)
     renderer.setPixelRatio(devicePixelRatio)
@@ -62,14 +60,15 @@
     // Create a plane geometry
     const planeGeometry = new THREE.PlaneGeometry(10,10,10,10)
     const planeMaterial = new THREE.MeshPhongMaterial({
-        color:0x0000FF, 
+        
         side : THREE.DoubleSide,
         // Add this to see the depth
-        flatShading : THREE.FlatShading
+        flatShading : THREE.FlatShading,
+        vertexColors : true
     })
     const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
     scene.add(planeMesh)
-    console.log(planeMesh.geometry.attributes.position.array)
+    
     const {array} = planeMesh.geometry.attributes.position;
 
     // Create depth to the geometry with a loop and target de z axis
@@ -80,8 +79,8 @@
         const z = array[i+2]
         array[i+2] = z + Math.random()
     }
-    // Lights
 
+    // Lights
     // Front light
     const fontLight = new THREE.DirectionalLight(0xFFFFFF, 1)
     fontLight.position.set(0, 0, 1)
@@ -97,17 +96,59 @@
     new OrbitControls(camera, renderer.domElement)
     camera.position.z = 10
     
-    // Rotate animation
+    // Event listener for the mouse
+
+    const mouse = {
+        x:undefined,
+        y:undefined
+    }
+    addEventListener("mousemove", (event) =>{
+        mouse.x = (event.clientX /innerWidth)*2-1
+        mouse.y = -(event.clientY /innerHeight)*2+1
+    })
+
+    // Set colors attribute for the mousemove
+
+    const colors = []
+    for (let i = 0; i < planeMesh.geometry.attributes.position.count; i++) {
+        colors.push(1,0,0) 
+    }
+    planeMesh.geometry.setAttribute('color', 
+    new THREE.BufferAttribute(
+        new Float32Array(colors),3)
+        )
+
+    // Rotate animation and Raycaster(pointer which detect the object)
 
     function animate() {
         requestAnimationFrame(animate)
         renderer.render(scene, camera)
+        raycaster.setFromCamera(mouse, camera)
+        const intersects = raycaster.intersectObject(planeMesh)
+        if(intersects.length>0){
+            const {color} = intersects[0].object.geometry.attributes
+            //vertice 1
+            color.setX(intersects[0].face.a,0)
+            color.setY(intersects[0].face.a,1)
+            color.setZ(intersects[0].face.a,1)
+            //vertice 1
+            color.setX(intersects[0].face.b,0)
+            color.setY(intersects[0].face.b,0)
+            color.setZ(intersects[0].face.b,1)
+            //vertice 1
+            color.setX(intersects[0].face.c,0)
+            color.setY(intersects[0].face.c,0)
+            color.setZ(intersects[0].face.c,1)
+            intersects[0].object.geometry.attributes.color.needsUpdate = true
+            console.log()
+        }
+
+
         //boxMesh.rotation.x +=0.01
         //boxMesh.rotation.y +=0.01
         //planeMesh.rotation.x += 0.004;
     }
     animate()
-
 
 
     
