@@ -109,7 +109,7 @@
 
     // Camera position
     new OrbitControls(camera, renderer.domElement)
-    camera.position.z = 100
+    camera.position.z = 40
 
     // Event listener for the mouse
     const mouse = {
@@ -200,8 +200,8 @@
     
     animate()
     // Roration of the planeMesh
-    planeMesh.rotation.x = -.2;
-    planeMesh.rotation.y = -.25;
+    planeMesh.rotation.x = 2.3;
+    planeMesh.rotation.y = -.45;
 
     
 
