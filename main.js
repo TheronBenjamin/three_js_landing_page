@@ -10,10 +10,10 @@
     const gui = new dat.GUI()
     const world = {
         plane:{
-            width: 24,
-            height: 24,
-            widthSegments: 25,
-            heightSegments: 25
+            width: 400,
+            height: 400,
+            widthSegments: 108,
+            heightSegments: 87
         }
     }
     gui.add(world.plane, "width", 1, 20).onChange(generatePlane)
@@ -30,12 +30,27 @@
             world.plane.widthSegments,
             world.plane.heightSegments
             )
-        const {array} = planeMesh.geometry.attributes.position;
-        for (let i=0; i<array.length; i+=3){
-        const x = array[i]
+    // Create depth to the geometry with a loop and target de z axis
+    const {array} = planeMesh.geometry.attributes.position;
+    const randomValues = []
+    for (let i=0; i<array.length; i++){
+        if(i%3 === 0){
+            const x = array[i]
         const y = array[i+1]
         const z = array[i+2]
+        array[i+2] = z + Math.random()
+        array[i] = x + (Math.random() -0.5) * 3
+        array[i+1] = y + (Math.random() -0.5) * 3
+        array[i+2] = z + (Math.random()- 0.5) * 3
         }
+        randomValues.push(Math.random() * Math.PI * 2)
+    }
+    
+    // Duplicate the array of position
+    planeMesh.geometry.attributes.position.randomValues = 
+    randomValues
+    planeMesh.geometry.attributes.position.originalPosition = 
+    planeMesh.geometry.attributes.position.array
         // Set colors attribute for the mousemove
         const colors = []
         for (let i = 0; i < planeMesh.geometry.attributes.position.count; i++) {
@@ -79,44 +94,12 @@
     })
     const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
     scene.add(planeMesh)
-    
-
-    // Create depth to the geometry with a loop and target de z axis
-    const {array} = planeMesh.geometry.attributes.position;
-    const randomValues = []
-    for (let i=0; i<array.length; i++){
-        if(i%3 === 0){
-            const x = array[i]
-        const y = array[i+1]
-        const z = array[i+2]
-        array[i+2] = z + Math.random()
-        array[i] = x + (Math.random() -0.5)
-        array[i+1] = y + (Math.random() -0.5)
-        array[i+2] = z + Math.random()
-        }
-        randomValues.push(Math.random() -0.5)
-    }
-    
-    // Duplicate the array of position
-    planeMesh.geometry.attributes.position.randomValues = 
-    randomValues
-    planeMesh.geometry.attributes.position.originalPosition = 
-    planeMesh.geometry.attributes.position.array
-
-    // Set colors attribute for the mousemove
-    const colors = []
-    for (let i = 0; i < planeMesh.geometry.attributes.position.count; i++) {
-        colors.push(0,.19,0.4) 
-    }
-    planeMesh.geometry.setAttribute('color', 
-    new THREE.BufferAttribute(
-        new Float32Array(colors),3)
-        )
+    generatePlane()
 
     // Lights
     // Front light
     const fontLight = new THREE.DirectionalLight(0xFFFFFF, 1)
-    fontLight.position.set(0, 0, 1)
+    fontLight.position.set(0, 1, 1)
     scene.add(fontLight)
 
     // Back light
@@ -126,7 +109,7 @@
 
     // Camera position
     new OrbitControls(camera, renderer.domElement)
-    camera.position.z = 10
+    camera.position.z = 100
 
     // Event listener for the mouse
     const mouse = {
@@ -152,10 +135,10 @@
         for (let i = 0; i < array.length; i+=3) {
             // x
             array[i] = originalPosition[i] + 
-            Math.cos(frame+randomValues[i])*0.003
+            Math.cos(frame+randomValues[i])*0.002
             //y
             array[i+1] = originalPosition[i+1] + 
-            Math.sin(frame+randomValues[i])*0.003
+            Math.sin(frame+randomValues[i])*0.006
             
         }
         planeMesh.geometry.attributes.position.needsUpdate = true
@@ -217,8 +200,8 @@
     
     animate()
     // Roration of the planeMesh
-    //planeMesh.rotation.x = 2.4;
-    //planeMesh.rotation.y = -.25;
+    planeMesh.rotation.x = -.2;
+    planeMesh.rotation.y = -.25;
 
     
 
