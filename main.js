@@ -135,7 +135,7 @@
         for (let i = 0; i < array.length; i+=3) {
             // x
             array[i] = originalPosition[i] + 
-            Math.cos(frame+randomValues[i])*0.002
+            Math.cos(frame+randomValues[i])*0.003
             //y
             array[i+1] = originalPosition[i+1] + 
             Math.sin(frame+randomValues[i])*0.006
