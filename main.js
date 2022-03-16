@@ -1,6 +1,7 @@
 //import './style.css'
 // Find the latest version by visiting https://cdn.skypack.dev/three.
   
+    import gsap from 'gsap';
     import * as THREE from 'https://cdn.skypack.dev/three@0.126.1';
     import {OrbitControls} from 'https://cdn.skypack.dev/three@0.126.1/examples/jsm/controls/OrbitControls.js'
     import * as dat from 'dat.gui'
@@ -10,10 +11,10 @@
     const gui = new dat.GUI()
     const world = {
         plane:{
-            width: 10,
-            height: 10,
-            widthSegments: 10,
-            heightSegments: 10
+            width: 19,
+            height: 19,
+            widthSegments: 62,
+            heightSegments: 18
         }
     }
     gui.add(world.plane, "width", 1, 20).onChange(generatePlane)
@@ -37,6 +38,15 @@
         const z = array[i+2]
         array[i+2] = z + Math.random()
         }
+        // Set colors attribute for the mousemove
+        const colors = []
+        for (let i = 0; i < planeMesh.geometry.attributes.position.count; i++) {
+            colors.push(0,.19,0.4) 
+        }
+        planeMesh.geometry.setAttribute('color', 
+        new THREE.BufferAttribute(
+            new Float32Array(colors),3)
+            )
     }
 
 
@@ -58,7 +68,11 @@
     document.body.appendChild(renderer.domElement);
 
     // Create a plane geometry
-    const planeGeometry = new THREE.PlaneGeometry(10,10,10,10)
+    const planeGeometry = new THREE.PlaneGeometry(
+        world.plane.width,
+        world.plane.height,
+        world.plane.widthSegments,
+        world.plane.heightSegments)
     const planeMaterial = new THREE.MeshPhongMaterial({
         
         side : THREE.DoubleSide,
@@ -69,9 +83,11 @@
     const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
     scene.add(planeMesh)
     
-    const {array} = planeMesh.geometry.attributes.position;
+    
 
     // Create depth to the geometry with a loop and target de z axis
+
+    const {array} = planeMesh.geometry.attributes.position;
 
     for (let i=0; i<array.length; i+=3){
         const x = array[i]
@@ -79,6 +95,17 @@
         const z = array[i+2]
         array[i+2] = z + Math.random()
     }
+
+    // Set colors attribute for the mousemove
+
+    const colors = []
+    for (let i = 0; i < planeMesh.geometry.attributes.position.count; i++) {
+        colors.push(0,.19,0.4) 
+    }
+    planeMesh.geometry.setAttribute('color', 
+    new THREE.BufferAttribute(
+        new Float32Array(colors),3)
+        )
 
     // Lights
     // Front light
@@ -94,8 +121,8 @@
     // Camera position
 
     new OrbitControls(camera, renderer.domElement)
-    camera.position.z = 10
-    
+    camera.position.z = 7
+
     // Event listener for the mouse
 
     const mouse = {
@@ -107,19 +134,7 @@
         mouse.y = -(event.clientY /innerHeight)*2+1
     })
 
-    // Set colors attribute for the mousemove
-
-    const colors = []
-    for (let i = 0; i < planeMesh.geometry.attributes.position.count; i++) {
-        colors.push(1,0,0) 
-    }
-    planeMesh.geometry.setAttribute('color', 
-    new THREE.BufferAttribute(
-        new Float32Array(colors),3)
-        )
-
     // Rotate animation and Raycaster(pointer which detect the object)
-
     function animate() {
         requestAnimationFrame(animate)
         renderer.render(scene, camera)
@@ -128,28 +143,62 @@
         if(intersects.length>0){
             const {color} = intersects[0].object.geometry.attributes
             //vertice 1
-            color.setX(intersects[0].face.a,0)
-            color.setY(intersects[0].face.a,1)
+            color.setX(intersects[0].face.a,0.1)
+            color.setY(intersects[0].face.a,0.5)
             color.setZ(intersects[0].face.a,1)
             //vertice 1
-            color.setX(intersects[0].face.b,0)
-            color.setY(intersects[0].face.b,0)
+            color.setX(intersects[0].face.b,0.1)
+            color.setY(intersects[0].face.b,0.5)
             color.setZ(intersects[0].face.b,1)
             //vertice 1
-            color.setX(intersects[0].face.c,0)
-            color.setY(intersects[0].face.c,0)
+            color.setX(intersects[0].face.c,0.1)
+            color.setY(intersects[0].face.c,0.5)
             color.setZ(intersects[0].face.c,1)
             intersects[0].object.geometry.attributes.color.needsUpdate = true
-            console.log()
+
+            // GSAP color hover effect
+            const initialColors ={
+                r: 0,
+                g: 0.19,
+                b: 0.4
+            }
+
+            const hoverColors ={
+                r: 0.1,
+                g: 0.5,
+                b: 1
+            }
+            gsap.to(hoverColors, {
+                r: initialColors.r,
+                g: initialColors.g,
+                b: initialColors.b,
+                onUpdate:()=>{
+                    //vertice 1
+                    color.setX(intersects[0].face.a,hoverColors.r)
+                    color.setY(intersects[0].face.a,hoverColors.g)
+                    color.setZ(intersects[0].face.a,hoverColors.b)
+                    //vertice 1
+                    color.setX(intersects[0].face.b,hoverColors.r)
+                    color.setY(intersects[0].face.b,hoverColors.g)
+                    color.setZ(intersects[0].face.b,hoverColors.b)
+                    //vertice 1
+                    color.setX(intersects[0].face.c,hoverColors.r)
+                    color.setY(intersects[0].face.c,hoverColors.g)
+                    color.setZ(intersects[0].face.c,hoverColors.b)
+                    intersects[0].object.geometry.attributes.color.needsUpdate = true
+                }
+            })
         }
 
 
         //boxMesh.rotation.x +=0.01
         //boxMesh.rotation.y +=0.01
-        //planeMesh.rotation.x += 0.004;
+        
     }
+    
     animate()
-
+    planeMesh.rotation.x = 2.4;
+    planeMesh.rotation.y = -.25;
 
     
 
