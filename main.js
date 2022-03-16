@@ -12,8 +12,8 @@
         plane:{
             width: 400,
             height: 400,
-            widthSegments: 108,
-            heightSegments: 87
+            widthSegments: 200,
+            heightSegments: 200
         }
     }
     gui.add(world.plane, "width", 1, 20).onChange(generatePlane)
@@ -109,7 +109,7 @@
 
     // Camera position
     new OrbitControls(camera, renderer.domElement)
-    camera.position.z = 100
+    camera.position.z = 70
 
     // Event listener for the mouse
     const mouse = {
